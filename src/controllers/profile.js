@@ -6,7 +6,7 @@ exports.getProfileInfo = async (req, res) => {
 
   try {
     const [users] = await db.query(
-      "SELECT id, username, email, password, profile_picture FROM users WHERE id = ?",
+      "SELECT userId, username, email, profile_picture FROM users WHERE userId = ?",
       [userId]
     );
 
@@ -28,7 +28,7 @@ exports.changeProfilePicture = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "UPDATE users SET profile_picture = ? WHERE id = ?",
+      "UPDATE users SET profile_picture = ? WHERE userId = ?",
       [imageUrl, userId]
     );
 
@@ -49,7 +49,7 @@ exports.changeUsername = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "UPDATE users SET username = ? WHERE id = ?",
+      "UPDATE users SET username = ? WHERE userId = ?",
       [username, userId]
     );
 
@@ -70,7 +70,7 @@ exports.changeEmail = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "UPDATE users SET email = ? WHERE id = ?",
+      "UPDATE users SET email = ? WHERE userId = ?",
       [email, userId]
     );
 
