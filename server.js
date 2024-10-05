@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./src/routers/auth");
+const profileRoutes = require("./src/routers/profile");
 require("dotenv").config();
 
 console.log("Starting server initialization...");
@@ -13,13 +14,18 @@ console.log("Express app created");
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Auth Routes
 app.use("/api/auth", authRoutes);
 
+// Profile Routes
+app.use("/api/profile", profileRoutes);
+
+// Test Route
 app.get("/api/test", (req, res) => {
   res.status(200).send("test route working");
 });
 
+// Default Route
 app.get("/", (req, res) => {
   res.send("Hello from the Capstone Backend!");
 });
