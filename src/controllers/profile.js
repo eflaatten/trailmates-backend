@@ -2,13 +2,16 @@ const db = require("../config/db");
 
 // GET Profile controllers
 exports.getProfileInfo = async (req, res) => {
+  console.log("Function called.")
   const { userId } = req.user;
 
   try {
     const [users] = await db.query(
-      "SELECT userId, username, email, profile_picture FROM users WHERE userId = ?",
+      "SELECT userId, username, email, profile_picture, created_at FROM users WHERE userId = ?",
       [userId]
     );
+
+    console.log("Query result:", users);
 
     if (users.length === 0) {
       return res.status(404).json({ message: "User not found" });
@@ -24,12 +27,12 @@ exports.getProfileInfo = async (req, res) => {
 // UPDATE Profile controllers 
 exports.changeProfilePicture = async (req, res) => {
   const { userId } = req.user;
-  const { imageUrl } = req.body;
+  const { profile_picture } = req.body;
 
   try {
     const [result] = await db.query(
       "UPDATE users SET profile_picture = ? WHERE userId = ?",
-      [imageUrl, userId]
+      [profile_picture, userId]
     );
 
     if (result.affectedRows === 0) {

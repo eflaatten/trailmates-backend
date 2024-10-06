@@ -40,6 +40,7 @@ exports.login = async (req, res) => {
     }
 
     const user = users[0];
+    console.log("User:", user);
     // Ensure the field name matches the database schema
     const isMatch = await bcrypt.compare(password, user.password);
 
@@ -48,7 +49,7 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, username: user.username },
+      { userId: user.userId, username: user.username },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -56,7 +57,7 @@ exports.login = async (req, res) => {
     res.json({
       message: "Login successful",
       token,
-      user: { id: user.id, username: user.username },
+      user: { id: user.userId, username: user.username },
     });
   } catch (error) {
     console.error("Login error:", error);
