@@ -27,18 +27,17 @@ exports.getProfileInfo = async (req, res) => {
 
 // UPDATE Profile controllers 
 exports.changeProfilePicture = async (req, res) => {
-  const { userId } = req.user; // Get user ID from the authenticated user
-  const file = req.file; // Get the uploaded file from the request
+  const { userId } = req.user;
+  const file = req.file; 
 
   if (!file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
   try {
-    const blob = new Blob({ token: process.env.BLOB_READ_WRITE_TOKEN }); // Initialize Vercel Blob
-    const fileUrl = await blob.upload(file.data, { name: file.originalname });
+    const blob = new Blob({ token: process.env.BLOB_READ_WRITE_TOKEN });
+    const fileUrl = await blob.upload(file.buffer, { name: file.originalname }); 
 
-    // Now update the profile picture URL in the database
     const [result] = await db.query(
       "UPDATE users SET profile_picture = ? WHERE userId = ?",
       [fileUrl, userId]
