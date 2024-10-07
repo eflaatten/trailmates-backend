@@ -27,31 +27,24 @@ exports.getProfileInfo = async (req, res) => {
 // UPDATE Profile controllers 
 exports.changeProfilePicture = async (req, res) => {
   const { userId } = req.user;
-
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
+  const { profile_picture } = req.body;
 
   try {
-    const profilePicturePath = `/uploads/profile-pictures/${req.file.filename}`;
     const [result] = await db.query(
       "UPDATE users SET profile_picture = ? WHERE userId = ?",
-      [profilePicturePath, userId]
+      [profile_picture, userId]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({
-      message: "Profile picture updated successfully",
-      profilePicturePath,
-    });
+    res.json({ message: "Profile picture updated successfully" });
   } catch (error) {
     console.error("Change profile picture error:", error);
     res.status(500).json({ message: "Error updating profile picture" });
   }
-};
+}
 
 exports.changeUsername = async (req, res) => {
   const { userId } = req.user;
