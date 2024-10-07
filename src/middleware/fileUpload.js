@@ -17,10 +17,9 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      `${req.user.userId}-${uniqueSuffix}${path.extname(file.originalname)}`
-    );
+    // Ensure req.user exists, or provide a default if testing
+    const userId = req.user ? req.user.userId : "default-user";
+    cb(null, `${userId}-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
 
@@ -40,4 +39,4 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // Limit to 5MB
 });
 
-module.exports = upload;
+module.exports = { upload };
