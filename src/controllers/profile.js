@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { Blob } = require("@vercel/blob");
 
 // GET Profile controllers
 exports.getProfileInfo = async (req, res) => {
@@ -26,25 +27,33 @@ exports.getProfileInfo = async (req, res) => {
 
 // UPDATE Profile controllers 
 exports.changeProfilePicture = async (req, res) => {
-  const { userId } = req.user;
-  const { profile_picture } = req.body;
+  const { userId } = req.user; // Get user ID from the authenticated user
+  const file = req.file; // Get the uploaded file from the request
+
+  if (!file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
 
   try {
+    const blob = new Blob({ token: process.env.BLOB_READ_WRITE_TOKEN }); // Initialize Vercel Blob
+    const fileUrl = await blob.upload(file.data, { name: file.originalname });
+
+    // Now update the profile picture URL in the database
     const [result] = await db.query(
       "UPDATE users SET profile_picture = ? WHERE userId = ?",
-      [profile_picture, userId]
+      [fileUrl, userId]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ message: "Profile picture updated successfully" });
+    res.json({ message: "Profile picture updated successfully", url: fileUrl });
   } catch (error) {
     console.error("Change profile picture error:", error);
     res.status(500).json({ message: "Error updating profile picture" });
   }
-}
+};
 
 exports.changeUsername = async (req, res) => {
   const { userId } = req.user;
