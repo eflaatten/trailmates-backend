@@ -1,5 +1,6 @@
 const db = require("../config/db");
-const { Blob } = require("@vercel/blob");
+const {  } = require("@vercel/blob");
+
 
 // GET Profile controllers
 exports.getProfileInfo = async (req, res) => {
@@ -26,33 +27,44 @@ exports.getProfileInfo = async (req, res) => {
 }
 
 // UPDATE Profile controllers 
+const axios = require("axios");
+
 exports.changeProfilePicture = async (req, res) => {
-  const { userId } = req.user;
-  const file = req.file; 
-
-  if (!file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-
   try {
-    const blob = new Blob({ token: process.env.BLOB_READ_WRITE_TOKEN });
-    const fileUrl = await blob.upload(file.buffer, { name: file.originalname }); 
-
-    const [result] = await db.query(
-      "UPDATE users SET profile_picture = ? WHERE userId = ?",
-      [fileUrl, userId]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "User not found" });
+    if (!req.file && !req.body.profile_picture) {
+      console.log("No file found in request"); 
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
-    res.json({ message: "Profile picture updated successfully", url: fileUrl });
+    const fileData = req.file || req.body.profile_picture; 
+
+    const vercelBlobUrl = "https://bh43x1pj1kqhnkff.public.blob.vercel-storage.com"; 
+
+    const response = await axios.post(vercelBlobUrl, fileData, {
+      headers: {
+        "Content-Type": "multipart/form-data", 
+        Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`, 
+      },
+    });
+
+    if (response.status === 200) {
+      const blobUrl = response.data.url;
+      console.log("Upload successful:", blobUrl);
+      return res
+        .status(200)
+        .json({ message: "Profile picture updated successfully", blobUrl });
+    } else {
+      console.error("Vercel Blob upload failed:", response.data);
+      return res
+        .status(response.status)
+        .json({ message: "Failed to upload to Blob storage" });
+    }
   } catch (error) {
-    console.error("Change profile picture error:", error);
-    res.status(500).json({ message: "Error updating profile picture" });
+    console.error("Error updating profile picture:", error);
+    return res.status(500).json({ message: "Error updating profile picture" });
   }
 };
+
 
 exports.changeUsername = async (req, res) => {
   const { userId } = req.user;
