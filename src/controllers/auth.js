@@ -7,30 +7,40 @@ exports.signup = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
+    // Check if username or email already exists
+    const [existingUser] = await db.query(
+      "SELECT * FROM users WHERE username = ? OR email = ?",
+      [username, email]
+    );
+
+    if (existingUser.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "Username or email already in use" });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Using pooled connection for queries
+    // Insert new user
     const query =
       "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-    const [result] = await db.execute(query, [
-      username,
-      email,
-      hashedPassword,
-    ]);
+    const [result] = await db.execute(query, [username, email, hashedPassword]);
 
-    // Send success response
-    res.status(201).json({ message: "User registered successfully" });
+    // Generate token for the user
+    const token = jwt.sign(
+      { userId: result.insertId, username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Send success response with the token
+    res.status(201).json({ message: "User registered successfully", token });
   } catch (err) {
     console.error("Signup error:", err);
-    const errorMessage =
-      err.code === "ER_DUP_ENTRY"
-        ? "Email or username already in use"
-        : "Error creating user";
-    res.status(500).json({ message: errorMessage });
+    res.status(500).json({ message: "Error creating user" });
   }
 };
-
-
 
 
 // Login Controller
