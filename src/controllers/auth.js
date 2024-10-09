@@ -7,24 +7,31 @@ exports.signup = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert new user
+    // Using pooled connection for queries
     const query =
       "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-    db.query(query, [username, email, hashedPassword], (err, result) => {
-      if (err) {
-        console.error("Signup error:", err);
-        return res.status(500).json({ message: "Error creating user" });
-      }
-      res.status(201).json({ message: "User registered successfully" });
-    });
-  } catch (error) {
-    console.error("Password hashing error:", error);
-    res.status(500).json({ message: "Error creating user" });
+    const [result] = await db.execute(query, [
+      username,
+      email,
+      hashedPassword,
+    ]);
+
+    // Send success response
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error("Signup error:", err);
+    const errorMessage =
+      err.code === "ER_DUP_ENTRY"
+        ? "Email or username already in use"
+        : "Error creating user";
+    res.status(500).json({ message: errorMessage });
   }
 };
+
+
+
 
 // Login Controller
 exports.login = async (req, res) => {
