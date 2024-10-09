@@ -3,7 +3,6 @@ const { changeProfilePicture, changeUsername, getProfileInfo } = require("../con
 const { authenticateToken } = require("../middleware/authenticate");
 const router = express.Router();
 
-router.post('/change-profile-picture', authenticateToken, changeProfilePicture);
 router.post('/change-username', authenticateToken, changeUsername);
 router.get('/get-profile', authenticateToken, getProfileInfo);
 

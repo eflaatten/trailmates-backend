@@ -9,7 +9,7 @@ exports.authenticateToken = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ message: "Invalid Token" });
     req.user = user;
-    console.log("Decoded token:", user); // In authenticateToken middleware
+    console.log("Decoded token:", user); 
     next();
   });
 };
