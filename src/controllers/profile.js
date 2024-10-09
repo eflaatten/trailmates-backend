@@ -1,5 +1,5 @@
 const db = require("../config/db");
-const {  } = require("@vercel/blob");
+const axios = require("axios");
 
 
 // GET Profile controllers
@@ -27,37 +27,43 @@ exports.getProfileInfo = async (req, res) => {
 }
 
 // UPDATE Profile controllers 
-const axios = require("axios");
 
 exports.changeProfilePicture = async (req, res) => {
   try {
-    if (!req.file && !req.body.profile_picture) {
-      console.log("No file found in request"); 
+    if (!req.body.profile_picture) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const fileData = req.file || req.body.profile_picture; 
-
+    const fileData = req.body.profile_picture; 
     const vercelBlobUrl = "https://bh43x1pj1kqhnkff.public.blob.vercel-storage.com"; 
 
     const response = await axios.post(vercelBlobUrl, fileData, {
       headers: {
-        "Content-Type": "multipart/form-data", 
-        Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`, 
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
       },
     });
 
     if (response.status === 200) {
       const blobUrl = response.data.url;
-      console.log("Upload successful:", blobUrl);
-      return res
-        .status(200)
-        .json({ message: "Profile picture updated successfully", blobUrl });
+
+      const userId = req.user.userId; 
+      await db.sequelize.query(
+        `UPDATE users SET profile_picture = :blobUrl WHERE userId = :userId`,
+        {
+          replacements: { blobUrl, userId },
+          type: db.sequelize.QueryTypes.UPDATE,
+        }
+      );
+
+      return res.status(200).json({
+        message: "Profile picture updated successfully",
+        profile_picture_url: blobUrl,
+      });
     } else {
-      console.error("Vercel Blob upload failed:", response.data);
-      return res
-        .status(response.status)
-        .json({ message: "Failed to upload to Blob storage" });
+      return res.status(response.status).json({
+        message: "Failed to upload to Blob storage",
+      });
     }
   } catch (error) {
     console.error("Error updating profile picture:", error);
