@@ -121,3 +121,21 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: "Error updating password" });
   }
 }
+
+
+exports.deleteAccount = async (req, res) => {
+  const { userId } = req.user;
+
+  try {
+    const [result] = await db.query("DELETE FROM users WHERE id = ?", [userId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Delete account error:", error);
+    res.status(500).json({ message: "Error deleting account" });
+  }
+}
