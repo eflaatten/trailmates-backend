@@ -1,5 +1,5 @@
 const express = require("express");
-const { getTrips, getUsersTrips, createTrip } = require("../controllers/trips");
+const { getTrips, getUsersTrips, createTrip, deleteTripByUserId } = require("../controllers/trips");
 const { authenticateToken } = require("../middleware/authenticate");
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.get("/getUserTrips", authenticateToken, getUsersTrips);
 
 // CREATE Trip
 router.post("/createTrip", authenticateToken, createTrip);
+
+// DELETE Trip by userId
+router.delete("/deleteTrip/:tripId", authenticateToken, deleteTripByUserId);
 
 module.exports = router;
