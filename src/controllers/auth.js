@@ -127,7 +127,7 @@ exports.deleteAccount = async (req, res) => {
   const { userId } = req.user;
 
   try {
-    const [result] = await db.query("DELETE FROM users WHERE id = ?", [userId]);
+    const [result] = await db.query("DELETE FROM users WHERE userId = ?", [userId]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "User not found" });
