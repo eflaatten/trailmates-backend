@@ -139,36 +139,3 @@ exports.removeProfilePicture = async (req, res) => {
     res.status(500).json({ message: "Error removing profile picture" });
   }
 };
-
-
-// exports.removeProfilePicture = async (req, res) => {
-//   const { userId } = req.user;
-
-//   try {
-//     const [users] = await db.query(
-//       "SELECT profile_picture FROM users WHERE userId = ?",
-//       [userId]
-//     );
-
-//     if (users.length === 0) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     const user = users[0];
-
-//     if (!user.profile_picture) {
-//       return res.status(400).json({ message: "No profile picture to remove" });
-//     }
-
-//     const fileName = user.profile_picture.split("/").pop();
-//     await axios.delete(user.profile_picture);
-//     await db.query("UPDATE users SET profile_picture = NULL WHERE userId = ?", [
-//       userId,
-//     ]);
-
-//     res.json({ message: "Profile picture removed successfully", fileName });
-//   } catch (error) {
-//     console.error("Remove profile picture error:", error);
-//     res.status(500).json({ message: "Error removing profile picture" });
-//   }
-// }

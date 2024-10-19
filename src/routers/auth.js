@@ -7,6 +7,6 @@ router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", authenticateToken, logout);
 router.post("/change-password", authenticateToken, changePassword);
-router.post("/delete-account", authenticateToken, deleteAccount);
+router.delete("/delete-account", authenticateToken, deleteAccount);
 
 module.exports = router;
