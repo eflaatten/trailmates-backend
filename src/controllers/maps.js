@@ -30,4 +30,20 @@ exports.fetchPois = async (req, res) => {
   }
 };
 
+// Geocode location
+exports.geocodeLocation = async (req, res) => {
+  const { location } = req.query;
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+      location
+    )}&key=${GOOGLE_MAPS_API_KEY}`;
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching geocoding data:', error);
+    res.status(500).json({ error: 'Error fetching geocoding data' });
+  }
+};
+
 module.exports = router;
