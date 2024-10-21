@@ -94,7 +94,7 @@ exports.changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   try {
-    const [users] = await db.query("SELECT * FROM users WHERE id = ?", [
+    const [users] = await db.query("SELECT * FROM users WHERE userId = ?", [
       userId,
     ]);
 
@@ -110,7 +110,7 @@ exports.changePassword = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await db.query("UPDATE users SET password = ? WHERE id = ?", [
+    await db.query("UPDATE users SET password = ? WHERE userId = ?", [
       hashedPassword,
       userId,
     ]);
