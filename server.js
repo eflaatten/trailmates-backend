@@ -3,6 +3,7 @@ const cors = require("cors");
 const authRoutes = require("./src/routers/auth");
 const profileRoutes = require("./src/routers/profile");
 const tripRoutes = require("./src/routers/trips");
+const mapRoutes = require("./src/routers/maps");
 require("dotenv").config();
 
 console.log("Starting server initialization...");
@@ -23,6 +24,9 @@ app.use("/api/profile", profileRoutes);
 
 // Trip Routes
 app.use("/api/trips", tripRoutes);
+
+// Map Routes
+app.use("/api/maps", mapRoutes);
 
 // Test Route
 app.get("/api/test", (req, res) => {
