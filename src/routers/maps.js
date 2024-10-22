@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-import { fetchRoutes, fetchPois, geocodeLocation } from "../controllers/maps";
+const { fetchRoutes, fetchPois, geocodeLocation } = require("../controllers/maps");
 
 router.get('/routes', fetchRoutes);
 router.get('/pois', fetchPois);

@@ -45,5 +45,3 @@ exports.geocodeLocation = async (req, res) => {
     res.status(500).json({ error: 'Error fetching geocoding data' });
   }
 };
-
-module.exports = router;
