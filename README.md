@@ -12,7 +12,7 @@ This repository contains the backend code for the Capstone App. It is built usin
     - [Profile](#profile)
     - [Trips](#trips)
     - [Maps](#maps)
-  - [Environment Variables](#environment-variables)
+  - [Database Structure](#database-structure)
 
 ## Tech Stack 🛠️
 
@@ -63,14 +63,29 @@ This repository contains the backend code for the Capstone App. It is built usin
 - **POST /api/maps/fetchPoisForWaypoints**: Fetch points of interest for waypoints.
 - **GET /api/maps/geocode**: Geocode a location.
 
-## Environment Variables
+## Database Structure 
 
-- `DB_HOST=key`
-- `DB_USER=key`
-- `DB_PASSWORD=key`
-- `DB_NAME=key`
-- `PORT=key`
-- `JWT_SECRET=key`
-- `BLOB_READ_WRITE_TOKEN=key`
-- `OPEN_AI_API_KEY=key`
-- `GOOGLE_MAPS_API_KEY=key`
+### Users Table
+
+| Column          | Type         | Description                        |
+|-----------------|--------------|------------------------------------|
+| `userId`        | INT          | Primary key, auto-increment        |
+| `username`      | VARCHAR(255) | Username of the user               |
+| `email`         | VARCHAR(255) | Email of the user                  |
+| `password`      | VARCHAR(255) | Hashed password                    |
+| `created_at`    | TIMESTAMP    | Timestamp of account creation      |
+| `profile_picture`| VARCHAR(255)| URL to the profile picture         |
+
+### Trips Table
+
+| Column            | Type         | Description                        |
+|-------------------|--------------|------------------------------------|
+| `tripId`          | INT          | Primary key, auto-increment        |
+| `userId`          | INT          | Foreign key referencing `userId`   |
+| `trip_name`       | VARCHAR(255) | Name of the trip                   |
+| `trip_description`| TEXT         | Description of the trip            |
+| `start_date`      | DATE         | Start date of the trip             |
+| `end_date`        | DATE         | End date of the trip               |
+| `destination`     | VARCHAR(255) | Destination of the trip            |
+| `openai_response` | TEXT         | Response from OpenAI API           |
+| `starting_location`| VARCHAR(255)| Starting location of the trip      |
