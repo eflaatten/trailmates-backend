@@ -104,6 +104,36 @@ function decodePolyline(encoded) {
 }
 
 // Fetch POIs near each waypoint
+// PLACES API PRICE CRITICAL - SWITCHED TO OVERPASS API
+// exports.fetchPoisForWaypoints = async (req, res) => {
+//   const { waypoints, radius = 80000, type = "restaurant" } = req.body;
+//   console.log("Waypoints for POI fetching:", waypoints);
+
+//   try {
+//     let allPois = {};
+
+//     for (const waypoint of waypoints) {
+//       console.log(
+//         `Fetching POIs for waypoint: ${waypoint.lat},${waypoint.lng}`
+//       );
+//       const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${waypoint.lat},${waypoint.lng}&radius=${radius}&type=${type}&key=${GOOGLE_MAPS_API_KEY}`;
+//       const response = await axios.get(url);
+
+//       const pois = response.data.results
+//         .sort((a, b) => b.rating - a.rating)
+//         .slice(0, 3);
+//       allPois[`${waypoint.lat},${waypoint.lng}`] = pois;
+//     }
+
+//     console.log("Final POIs for each waypoint:", allPois);
+
+//     res.json(allPois);
+//   } catch (error) {
+//     console.error("Error fetching POIs for each waypoint:", error);
+//     res.status(500).json({ error: "Error fetching POIs for each waypoint" });
+//   }
+// };
+// Fetch POIs near each waypoint using Overpass API
 exports.fetchPoisForWaypoints = async (req, res) => {
   const { waypoints, radius = 80000, type = "restaurant" } = req.body;
   console.log("Waypoints for POI fetching:", waypoints);
@@ -112,15 +142,28 @@ exports.fetchPoisForWaypoints = async (req, res) => {
     let allPois = {};
 
     for (const waypoint of waypoints) {
-      console.log(
-        `Fetching POIs for waypoint: ${waypoint.lat},${waypoint.lng}`
-      );
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${waypoint.lat},${waypoint.lng}&radius=${radius}&type=${type}&key=${GOOGLE_MAPS_API_KEY}`;
+      console.log(`Fetching POIs for waypoint: ${waypoint.lat},${waypoint.lng}`);
+
+      // Overpass query template for fetching POIs of a specific type within a radius
+      const overpassQuery = `
+        [out:json];
+        node["amenity"="${type}"](around:${radius},${waypoint.lat},${waypoint.lng});
+        out body;
+      `;
+
+      const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
       const response = await axios.get(url);
 
-      const pois = response.data.results
-        .sort((a, b) => b.rating - a.rating)
-        .slice(0, 3);
+      const pois = response.data.elements
+        .map(poi => ({
+          name: poi.tags.name || "Unknown",
+          lat: poi.lat,
+          lng: poi.lon,
+          type: poi.tags.amenity || type,
+          // Overpass doesn't provide ratings, but other info may be added here
+        }))
+        .slice(0, 3); // Slice the top 3 results for each waypoint
+
       allPois[`${waypoint.lat},${waypoint.lng}`] = pois;
     }
 
