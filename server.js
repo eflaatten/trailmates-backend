@@ -13,7 +13,9 @@ const app = express();
 console.log("Express app created");
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "*", // Allow all origins
+}));
 app.use(express.json());
 
 // Auth Routes
