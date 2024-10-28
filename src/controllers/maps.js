@@ -133,6 +133,7 @@ function decodePolyline(encoded) {
 //     res.status(500).json({ error: "Error fetching POIs for each waypoint" });
 //   }
 // };
+
 // Fetch POIs near each waypoint using Overpass API
 exports.fetchPoisForWaypoints = async (req, res) => {
   const { waypoints, radius = 80000, type = "restaurant" } = req.body;
@@ -142,7 +143,9 @@ exports.fetchPoisForWaypoints = async (req, res) => {
     let allPois = {};
 
     for (const waypoint of waypoints) {
-      console.log(`Fetching POIs for waypoint: ${waypoint.lat},${waypoint.lng}`);
+      console.log(
+        `Fetching POIs for waypoint: ${waypoint.lat},${waypoint.lng}`
+      );
 
       // Overpass query template for fetching POIs of a specific type within a radius
       const overpassQuery = `
@@ -151,18 +154,28 @@ exports.fetchPoisForWaypoints = async (req, res) => {
         out body;
       `;
 
-      const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+      const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
+        overpassQuery
+      )}`;
       const response = await axios.get(url);
 
       const pois = response.data.elements
-        .map(poi => ({
+        .map((poi) => ({
           name: poi.tags.name || "Unknown",
           lat: poi.lat,
           lng: poi.lon,
           type: poi.tags.amenity || type,
-          // Overpass doesn't provide ratings, but other info may be added here
+          // Attempt to build an address if address tags are available
+          address:
+            [
+              poi.tags["addr:street"],
+              poi.tags["addr:city"],
+              poi.tags["addr:postcode"],
+            ]
+              .filter(Boolean) // Remove any undefined elements
+              .join(", ") || "Address not available",
         }))
-        .slice(0, 3); // Slice the top 3 results for each waypoint
+        .slice(0, 3); // Get top 3 results per waypoint
 
       allPois[`${waypoint.lat},${waypoint.lng}`] = pois;
     }
@@ -175,6 +188,7 @@ exports.fetchPoisForWaypoints = async (req, res) => {
     res.status(500).json({ error: "Error fetching POIs for each waypoint" });
   }
 };
+
 
 // Geocode location
 exports.geocodeLocation = async (req, res) => {
