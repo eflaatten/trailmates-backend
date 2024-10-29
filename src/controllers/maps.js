@@ -10,7 +10,7 @@ exports.fetchRoutes = async (req, res) => {
     !origin.lng ||
     !destination ||
     !destination.lat ||
-    !destination.lng
+    !destination.lng || destination.lon
   ) {
     return res
       .status(400)
