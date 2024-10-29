@@ -33,7 +33,7 @@ exports.createTrip = async (req, res) => {
   try {
     const prompt = `Generate a summary road trip named "${trip_name}" starting from ${starting_location} to ${destination} from ${start_date} to ${end_date}. 
     Include:
-    1. Recommend stops for food along the route with a link to google maps for each stop.
+    1. Recommend stops for food along the route with a link to google maps for each stop (make sure to include the full google maps link).
     2. Recommend hotels to stay at along or at the destination with a link to their website.
     3. Recommend sights or activities to do along the route or at the destination with a link to their website.
     Make it detailed but concise (under 200 words).
