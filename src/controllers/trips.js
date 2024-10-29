@@ -31,7 +31,11 @@ exports.createTrip = async (req, res) => {
   const { trip_name, trip_description, start_date, end_date, destination, starting_location} = req.body;
 
   try {
-    const prompt = `Generate a brief summary for a roadtrip/trip named "${trip_name}" starting from ${starting_location} to ${destination} from ${start_date} to ${end_date} in less than 100 words.`;
+    const prompt = `Generate a brief itinerary for a road trip named "${trip_name}" starting from ${starting_location} to ${destination} from ${start_date} to ${end_date}. 
+    Include:
+    1. Key places to stop along the route.
+    2. Recommended restaurants and hotels with links to their websites.
+    Make it detailed but concise (under 200 words).`;
     const openai_response = await axios.post("https://api.openai.com/v1/chat/completions", 
     {
       model: "gpt-4o",

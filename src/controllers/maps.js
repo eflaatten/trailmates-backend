@@ -134,35 +134,7 @@ function decodePolyline(encoded) {
 
   return points; // Return the array of points
 }
-// PLACES API PRICE ~ SWITCHED TO NOMINATIM
-// exports.fetchPoisForWaypoints = async (req, res) => {
-//   const { waypoints, radius = 80000, type = "restaurant" } = req.body;
-//   console.log("Waypoints for POI fetching:", waypoints);
 
-//   try {
-//     let allPois = {};
-
-//     for (const waypoint of waypoints) {
-//       console.log(
-//         `Fetching POIs for waypoint: ${waypoint.lat},${waypoint.lng}`
-//       );
-//       const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${waypoint.lat},${waypoint.lng}&radius=${radius}&type=${type}&key=${GOOGLE_MAPS_API_KEY}`;
-//       const response = await axios.get(url);
-
-//       const pois = response.data.results
-//         .sort((a, b) => b.rating - a.rating)
-//         .slice(0, 3);
-//       allPois[`${waypoint.lat},${waypoint.lng}`] = pois;
-//     }
-
-//     console.log("Final POIs for each waypoint:", allPois);
-
-//     res.json(allPois);
-//   } catch (error) {
-//     console.error("Error fetching POIs for each waypoint:", error);
-//     res.status(500).json({ error: "Error fetching POIs for each waypoint" });
-//   }
-// };
 // Fetch POIs near each waypoint using Overpass API
 exports.fetchPoisForWaypoints = async (req, res) => {
   const { waypoints, radius = 80000, type = "restaurant" } = req.body;
