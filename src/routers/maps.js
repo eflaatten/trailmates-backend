@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { fetchRoutes, fetchWaypoints, fetchPoisForWaypoints, geocodeLocation } = require("../controllers/maps");
 
-router.get('/routes', fetchRoutes);
+router.post('/routes', fetchRoutes);
 router.post('/fetchWaypoints', fetchWaypoints);
 router.post('/fetchPoisForWaypoints', fetchPoisForWaypoints);
-router.get('/geocode', geocodeLocation);
+router.post('/geocode', geocodeLocation);
 
 module.exports = router;

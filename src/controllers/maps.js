@@ -1,78 +1,101 @@
 const axios = require("axios");
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-
-// Fetch route from Google Directions API
 exports.fetchRoutes = async (req, res) => {
-  const { origin, destination } = req.query;
+  const { origin, destination } = req.body; // Access from request body
+
+  // Validate parameters
+  if (!origin || !destination) {
+    return res
+      .status(400)
+      .json({ error: "Origin and destination are required" });
+  }
+
+  // Remove all newline and whitespace characters
+  const sanitizedOrigin = origin.replace(/\s+/g, "");
+  const sanitizedDestination = destination.replace(/\s+/g, "");
 
   try {
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&key=${GOOGLE_MAPS_API_KEY}`;
+    // Reverse coordinates for OSRM format (longitude,latitude)
+    const originCoords = sanitizedOrigin.split(",").reverse().join(",");
+    const destinationCoords = sanitizedDestination
+      .split(",")
+      .reverse()
+      .join(",");
+
+    // Construct and encode the URL
+    const url = `http://router.project-osrm.org/route/v1/driving/${encodeURIComponent(
+      originCoords
+    )};${encodeURIComponent(
+      destinationCoords
+    )}?overview=full&geometries=polyline`;
+
+    console.log("Encoded OSRM URL:", url); // Log the complete URL
+
     const response = await axios.get(url);
 
     if (!response.data.routes || response.data.routes.length === 0) {
       return res.status(404).json({ error: "No route found" });
     }
 
-    const route = response.data.routes[0].overview_polyline.points;
+    const route = response.data.routes[0].geometry;
 
     res.json({
       polyline: route,
       legs: response.data.routes[0].legs,
     });
   } catch (error) {
-    console.error("Error fetching route:", error);
+    console.error(
+      "Error fetching route:",
+      error.response ? error.response.data : error.message
+    );
     res.status(500).json({ error: "Error fetching route" });
   }
 };
 
-// Fetch waypoints along a route
+// Fetch waypoints along a route from OSRM
 exports.fetchWaypoints = async (req, res) => {
-  const { origin, destination } = req.body;
-  console.log("Origin:", origin, "Destination:", destination);
+  const { origin, destination } = req.body; // Ensure you're accessing from req.body
+
+  // Log origin and destination to verify they're being received
+  console.log("Origin:", origin);
+  console.log("Destination:", destination);
+
+  // Validate parameters
+  if (!origin || !destination) {
+    return res.status(400).json({ error: "Origin and destination are required" });
+  }
 
   try {
-    const directionsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&key=${GOOGLE_MAPS_API_KEY}`;
-    const directionsResponse = await axios.get(directionsUrl);
+    // Reverse coordinates for OSRM format (longitude,latitude)
+    const originCoords = origin.split(',').reverse().join(',');
+    const destinationCoords = destination.split(',').reverse().join(',');
 
-    if (!directionsResponse.data.routes || directionsResponse.data.routes.length === 0) {
+    const url = `http://router.project-osrm.org/route/v1/driving/${originCoords};${destinationCoords}?overview=full&geometries=polyline`;
+    console.log("OSRM URL:", url); // Log the complete URL being requested
+
+    const response = await axios.get(url);
+
+    if (!response.data.routes || response.data.routes.length === 0) {
       return res.status(404).json({ error: "No route found between locations." });
     }
 
-    const route = directionsResponse.data.routes[0];
-    const overviewPolyline = route.overview_polyline?.points;
+    const route = response.data.routes[0];
+    const overviewPolyline = route.geometry;
 
     if (!overviewPolyline) {
       return res.status(500).json({ error: "No overview polyline found in route data." });
     }
 
-    // Decode polyline into waypoints
+    // Decode polyline into waypoints (use existing decodePolyline function if available)
     const waypoints = decodePolyline(overviewPolyline);
 
-    // Calculate total route distance in miles
-    const distanceInMeters = route.legs.reduce((sum, leg) => sum + (leg.distance ? leg.distance.value : 0), 0);
-    const distanceInMiles = distanceInMeters / 1609.34; // Convert meters to miles
-
-    // Determine interval based on distance
-    let interval;
-    if (distanceInMiles <= 200) {
-      interval = Math.floor(waypoints.length / 1); // 3 waypoints for short trips ~ or adjust based on distance
-    } else if (distanceInMiles <= 1000) {
-      interval = Math.floor(waypoints.length / 3); // 5 waypoints for medium trips ~ or adjust based on distance
-    } else {
-      interval = Math.floor(waypoints.length / 7); // 10 waypoints for long trips ~ or adjust based on distance
-    }
-
-    // Select waypoints based on interval
-    const selectedWaypoints = waypoints.filter((_, index) => index % interval === 0);
-    console.log("Selected waypoints based on distance:", selectedWaypoints);
-
-    res.json({ waypoints: selectedWaypoints });
+    res.json({ waypoints });
   } catch (error) {
-    console.error("Error fetching waypoints:", error);
+    console.error("Error fetching waypoints:", error.response ? error.response.data : error.message);
     res.status(500).json({ error: "Error fetching waypoints" });
   }
 };
+
 
 // Decode polyline into an array of latitude and longitude points
 function decodePolyline(encoded) {
@@ -102,8 +125,6 @@ function decodePolyline(encoded) {
 
   return points; // Return the array of points
 }
-
-// Fetch POIs near each waypoint
 // PLACES API PRICE ~ SWITCHED TO NOMINATIM
 // exports.fetchPoisForWaypoints = async (req, res) => {
 //   const { waypoints, radius = 80000, type = "restaurant" } = req.body;
@@ -133,7 +154,6 @@ function decodePolyline(encoded) {
 //     res.status(500).json({ error: "Error fetching POIs for each waypoint" });
 //   }
 // };
-
 // Fetch POIs near each waypoint using Overpass API
 exports.fetchPoisForWaypoints = async (req, res) => {
   const { waypoints, radius = 80000, type = "restaurant" } = req.body;
@@ -185,17 +205,38 @@ exports.fetchPoisForWaypoints = async (req, res) => {
   }
 };
 
-
 // Geocode location
 exports.geocodeLocation = async (req, res) => {
-  const { location } = req.query;
+  const { location } = req.body; // Retrieve location from the body
+
+  // Validate that location is provided
+  if (!location) {
+    return res.status(400).json({ error: "Location is required" });
+  }
 
   try {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
       location
-    )}&key=${GOOGLE_MAPS_API_KEY}`;
-    const response = await axios.get(url);
-    res.json(response.data);
+    )}&format=json&addressdetails=1`;
+
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "tripmates/1.0 (https://tripmates.org)",
+      },
+    });
+
+    // Check if data is returned and format the response
+    if (response.data && response.data.length > 0) {
+      const data = response.data.map((item) => ({
+        name: item.display_name,
+        lat: item.lat,
+        lon: item.lon,
+        address: item.address,
+      }));
+      res.json(data);
+    } else {
+      res.status(404).json({ error: "Location not found" });
+    }
   } catch (error) {
     console.error("Error fetching geocoding data:", error);
     res.status(500).json({ error: "Error fetching geocoding data" });
