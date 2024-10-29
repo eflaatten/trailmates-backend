@@ -31,7 +31,11 @@ exports.fetchRoutes = async (req, res) => {
 
     console.log("Encoded OSRM URL:", url); // Log the complete URL
 
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "tripmates/1.0 (https://tripmates.org)",
+      },
+    });
 
     if (!response.data.routes || response.data.routes.length === 0) {
       return res.status(404).json({ error: "No route found" });
@@ -73,7 +77,11 @@ exports.fetchWaypoints = async (req, res) => {
     const url = `http://router.project-osrm.org/route/v1/driving/${originCoords};${destinationCoords}?overview=full&geometries=polyline`;
     console.log("OSRM URL:", url); // Log the complete URL being requested
 
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "tripmates/1.0 (https://tripmates.org)",
+      },
+    });
 
     if (!response.data.routes || response.data.routes.length === 0) {
       return res.status(404).json({ error: "No route found between locations." });
