@@ -1,29 +1,29 @@
 const axios = require("axios");
 
 exports.fetchRoutes = async (req, res) => {
-  const { origin, destination } = req.body; // Access from request body
+  const { origin, destination } = req.body; // Expecting objects with lat and lng keys
 
   // Validate parameters
-  if (!origin || !destination) {
+  if (
+    !origin ||
+    !origin.lat ||
+    !origin.lng ||
+    !destination ||
+    !destination.lat ||
+    !destination.lng
+  ) {
     return res
       .status(400)
-      .json({ error: "Origin and destination are required" });
+      .json({ error: "Origin and destination with lat and lng are required" });
   }
 
-  // Remove all newline and whitespace characters
-  const sanitizedOrigin = origin.replace(/\s+/g, "");
-  const sanitizedDestination = destination.replace(/\s+/g, "");
-
   try {
-    // Reverse coordinates for OSRM format (longitude,latitude)
-    const originCoords = sanitizedOrigin.split(",").reverse().join(",");
-    const destinationCoords = sanitizedDestination
-      .split(",")
-      .reverse()
-      .join(",");
+    // Construct coordinates for OSRM (longitude,latitude format)
+    const originCoords = `${origin.lng},${origin.lat}`;
+    const destinationCoords = `${destination.lng},${destination.lat}`;
 
-    // Construct and encode the URL
-    const url = `http://router.project-osrm.org/route/v1/driving/${encodeURIComponent(
+    // Construct and encode the OSRM request URL
+    const url = `https://router.project-osrm.org/route/v1/driving/${encodeURIComponent(
       originCoords
     )};${encodeURIComponent(
       destinationCoords
@@ -31,6 +31,7 @@ exports.fetchRoutes = async (req, res) => {
 
     console.log("Encoded OSRM URL:", url); // Log the complete URL
 
+    // Send the request to OSRM
     const response = await axios.get(url, {
       headers: {
         "User-Agent": "tripmates/1.0 (https://tripmates.org)",
