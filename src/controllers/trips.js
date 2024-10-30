@@ -38,9 +38,7 @@ exports.createTrip = async (req, res) => {
     3. Recommend sights or activities to do along the route or at the destination with a link to their website.
     Make it detailed but concise (under 200 words).
     DO NOT include a day by day itinerary.
-    Provide full URLs only for Google Maps links.
-    Show the recommended stops in the order they would be encountered on the trip.
-    Format the response as a list with each item on a new line.`;
+    Provide full URLs only for Google Maps links.`;
     const openai_response = await axios.post("https://api.openai.com/v1/chat/completions", 
     {
       model: "gpt-4o",
