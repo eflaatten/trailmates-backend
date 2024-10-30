@@ -36,7 +36,8 @@ exports.createTrip = async (req, res) => {
     2. Recommend hotels to stay at along or at the destination with a link to their website.
     3. Recommend sights or activities to do along the route or at the destination with a link to their website.
     Make it detailed but concise (under 200 words).
-    DO NOT include a day by day itinerary.`;
+    DO NOT include a day by day itinerary.
+    For the links, but the name of the link in brackets, [like this](http://www.example.com).`;
     const openai_response = await axios.post("https://api.openai.com/v1/chat/completions", 
     {
       model: "gpt-4o",
