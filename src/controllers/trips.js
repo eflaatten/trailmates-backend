@@ -36,9 +36,10 @@ exports.createTrip = async (req, res) => {
     1. Recommend stops for food along the route with a full Google Maps link for each stop (do NOT use shortened links like goo.gl).
     2. Recommend hotels to stay at along or at the destination with a link to their website.
     3. Recommend sights or activities to do along the route or at the destination with a link to their website.
-    Make it detailed but concise (under 200 words).
+    Make it detailed but concise (under 300 words).
     DO NOT include a day by day itinerary.
-    Provide full URLs only for Google Maps links.`;
+    Provide full URLs only for Google Maps links.
+    Provide more than just a few stops for each category.`;
     const openai_response = await axios.post("https://api.openai.com/v1/chat/completions", 
     {
       model: "gpt-4o",
