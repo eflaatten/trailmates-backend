@@ -39,7 +39,8 @@ exports.createTrip = async (req, res) => {
     Make it detailed but concise (under 200 words).
     DO NOT include a day by day itinerary.
     Provide full URLs only for Google Maps links.
-    Provide atleast 10 recommendations for each category.`;
+    Show the recommended stops in the order they would be encountered on the trip.
+    Format the response as a list with each item on a new line.`;
     const openai_response = await axios.post("https://api.openai.com/v1/chat/completions", 
     {
       model: "gpt-4o",
