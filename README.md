@@ -21,7 +21,7 @@ This repository contains the backend code for the Capstone App. It is built usin
 - **MySQL**
 - **Vercel**
 - **OpenAI API**
-- **GoogleMaps API**
+- **OpenStreetMaps API**
 
 ## APIs
 
