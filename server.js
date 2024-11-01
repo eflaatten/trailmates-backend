@@ -4,7 +4,6 @@ const authRoutes = require("./src/routers/auth");
 const profileRoutes = require("./src/routers/profile");
 const tripRoutes = require("./src/routers/trips");
 const mapRoutes = require("./src/routers/maps");
-const commentRoutes = require('./src/routers/comments');
 require("dotenv").config();
 
 console.log("Starting server initialization...");
@@ -30,9 +29,6 @@ app.use("/api/trips", tripRoutes);
 
 // Map Routes
 app.use("/api/maps", mapRoutes);
-
-// Comment Routes
-app.use("/api/comments", commentRoutes);
 
 // Test Route
 app.get("/api/test", (req, res) => {
