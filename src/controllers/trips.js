@@ -37,6 +37,7 @@ exports.createTrip = async (req, res) => {
     2. Recommend hotels to stay at along or at the destination with a link to their website.
     3. Recommend restaurants to eat at along the route or at the destination
     4. Recommend sights or activities to do along the route or at the destination with a link to their website.
+    (Do it in less than 250 words)
     For the links, put the name of the link in brackets, [like this](http://www.example.com).`;
     const openai_response = await axios.post("https://api.openai.com/v1/chat/completions", 
     {
